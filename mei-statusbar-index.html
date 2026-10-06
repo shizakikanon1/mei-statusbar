@@ -83,7 +83,12 @@ button { font: inherit; }
 .voice--1 .voice__name { color: #d4c2ee; }
 .voice__head .eyebrow { font-size: 11px; letter-spacing: .04em; }
 .voice__text { margin: 9px 0 0; font-size: 14px; line-height: 1.85; color: var(--text); overflow-wrap: anywhere; white-space: pre-wrap; }
+/* 仪表状态：压在内心独白上方的一行外表速写 */
+.voice__state { margin: 7px 0 0; font-size: 12px; line-height: 1.7; color: var(--muted); overflow-wrap: anywhere; }
 .outfits { margin-top: 14px; border: 1px solid var(--edge); border-radius: 10px; overflow: hidden; }
+/* 身体状态与性爱实时复用着装那一套结构，只调间距 */
+.outfits--body .outfits__content { padding-bottom: 15px; }
+.outfits--sex .outfit__list { grid-template-columns: auto minmax(0, 1fr); max-width: 420px; }
 .outfits__summary { display: flex; gap: 10px; align-items: center; list-style: none; cursor: pointer; color: var(--muted); font-size: 13px; padding: 10px 13px; transition: background 150ms ease; }
 .outfits__summary::-webkit-details-marker { display: none; }
 .outfits__summary:hover { background: rgba(255, 255, 255, .035); }
@@ -124,15 +129,46 @@ button { font: inherit; }
   *, *::before, *::after { transition: none !important; animation: none !important; }
 }
 </style></head><body><div id="app"></div><script type="module">// This renderer reads message variables only. Schema validation and writes belong to MVU.
-const PLAIN_MODELS = Object.freeze({
-  芽衣: 'May_JK/May_JK.model3.json',
-  克雷塔: 'Creta_JK/Creta_JK.model3.json',
+
+/**
+ * 着装前缀 -> 模型。前缀由 MVU 变量「着装.下装／上衣」的开头决定，词表与更新规则里写的一致。
+ * 中学（DC=中学、JC=女子中学生）与高中（JK）分开，店内／女装／和服／修女各自独立，
+ * 否则四套「内衣」无法区分。长前缀必须排在短前缀前面。
+ * 注意大小写：creta_femboy 与 may_jk_pantie0 的文件名是小写的。
+ */
+const OUTFIT_MODELS = Object.freeze({
+  芽衣: {
+    '水手服（JC）': 'May_JC/May_JC.model3.json',
+    '内衣（JC）': 'May_JC_Pantie0/May_JC_Pantie0.model3.json',
+    '校服（JK）': 'May_JK/May_JK.model3.json',
+    '内衣（JK）': 'May_JK_Pantie0/may_jk_pantie0.model3.json',
+  },
+  克雷塔: {
+    '学兰（DC）': 'Creta_DC/Creta_DC.model3.json',
+    '内衣（DC）': 'Creta_DC_Pantie/Creta_DC_Pantie.model3.json',
+    '校服（JK）': 'Creta_JK/Creta_JK.model3.json',
+    女装: 'Creta_Femboy/creta_femboy.model3.json',
+    内衣: 'Creta_FemboyPantie/Creta_FemboyPantie.model3.json',
+    修女: 'Creta_HARDGAY/Creta_HARDGAY.model3.json',
+    和服: 'Creta_Kimono/Creta_Kimono.model3.json',
+  },
 });
 
-const PLAIN_FIELDS = ['上衣', '下装', '袜子', '鞋子', '配饰', '发型'];
-const NON_PLAIN = /内衣|赤裸|裸体|裸露|脱光|脱下|脱掉|开档|开裆|体液|精液|乳房|性器|阴部|后穴/;
-const MOODS = ['平常', '微笑', '坏笑', '大笑', '不悦', '生气', '惊讶', '为难', '害羞', '半哭', '流泪'];
-const SCENES = ['日常', '店里', '学校', '街上'];
+const OUTFIT_DEFAULT = Object.freeze({ 芽衣: '内衣（JK）', 克雷塔: '内衣' });
+
+// 着装八个字段全部展示，含内衣与体液状态。
+const CLOTHING_FIELDS = ['上衣', '下装', '内衣', '袜子', '鞋子', '配饰', '发型', '体液状态'];
+
+// 从 schema.ts 抄下来的字段表。用显式数组而不是对象键序，保证展示顺序稳定。
+const MAY_BODY = ['乳房', '乳头', '阴部', '阴蒂', '阴道', '宫颈', '子宫', '后穴', '口腔', '足部'];
+const CRETA_BODY = ['乳房', '乳头', '肉棒', '后穴', '前列腺', '口腔', '足部'];
+
+// 十六个值，覆盖 15 套模型的表情清单；拿不准时用「平常」表示默认脸。
+const MOODS = [
+  '平常', '微笑', '坏笑', '大笑', '不悦', '生气', '惊讶', '为难', '害羞', '半哭', '流泪',
+  '兴奋', '轻阿黑', '阿黑颜', '失神', '被玩坏',
+];
+const SCENES = ['日常', '店里', '学校', '街上', 'H场景', '事后'];
 
 function textValue(value, fallback = '—') {
   return typeof value === 'string' && value.trim() ? value.trim() : fallback;
@@ -144,11 +180,31 @@ function numberValue(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-function plainClothing(value) {
-  return PLAIN_FIELDS.flatMap(key => {
+function clothingList(value) {
+  return CLOTHING_FIELDS.flatMap(key => {
     const text = textValue(value?.[key], '');
-    return text && !NON_PLAIN.test(text) ? [{ key, value: text }] : [];
+    return text ? [{ key, value: text }] : [];
   });
+}
+
+/** 身体状态按固定字段表展开，空值补「—」，这样缺数据时行数也不会塌。 */
+function bodyFields(value, fields) {
+  return fields.map(key => ({ key, value: textValue(value?.[key], '—') }));
+}
+
+/**
+ * 立绘由着装决定。长前缀优先（内衣（DC）先于内衣），下装优先于上衣
+ * ——店内的芽衣是「上衣 赤裸 + 下装 内衣（JK）」。认不出前缀时按地点回退。
+ */
+function pickOutfit(着装, 地点, name) {
+  const tokens = Object.keys(OUTFIT_MODELS[name] ?? {});
+  const 下 = String(着装?.下装 ?? '');
+  const 上 = String(着装?.上衣 ?? '');
+  for (const token of tokens) if (下.startsWith(token)) return token;
+  for (const token of tokens) if (上.startsWith(token)) return token;
+  const atSchool = /学校|凑川|教室|天台|走廊/.test(String(地点 ?? ''));
+  if (atSchool && tokens.includes('校服（JK）')) return '校服（JK）';
+  return OUTFIT_DEFAULT[name];
 }
 
 function projectState(raw = {}) {
@@ -156,16 +212,22 @@ function projectState(raw = {}) {
   const time = context.时间 ?? {};
   const scene = context.场景 ?? {};
   const relationship = context.关系 ?? {};
-  const character = (name, innerKey) => {
+  const character = (name, innerKey, bodyFieldsList) => {
     const source = raw?.[name] ?? {};
+    const 着装 = source.着装 ?? {};
+    const outfit = pickOutfit(着装, scene.地点, name);
     return {
       name,
       mood: MOODS.includes(source.心情) ? source.心情 : '平常',
       inner: textValue(source.状态栏文本?.[innerKey], '此刻，思绪还未落成文字。'),
-      clothing: plainClothing(source.着装),
-      model: PLAIN_MODELS[name],
+      state: textValue(source.状态栏文本?.仪表状态, ''),
+      clothing: clothingList(着装),
+      body: bodyFields(source.身体状态, bodyFieldsList),
+      outfit,
+      model: OUTFIT_MODELS[name]?.[outfit] ?? OUTFIT_MODELS[name]?.[OUTFIT_DEFAULT[name]],
     };
   };
+  const sex = raw?.芽衣?.性爱实时 ?? {};
   return {
     date: textValue(time.日期, '日期待更新'),
     time: textValue(time.时刻, '--:--'),
@@ -177,7 +239,13 @@ function projectState(raw = {}) {
     identity: textValue(relationship.克雷塔身份阶段, '身份待更新'),
     intimacy: Math.round(Math.min(100, Math.max(0, numberValue(relationship.亲密度)))),
     savings: numberValue(raw?.克雷塔?.存款),
-    people: [character('芽衣', '内心独白'), character('克雷塔', '心声')],
+    sex: {
+      active: sex.进行中 === true,
+      partner: textValue(sex.对手, ''),
+      position: textValue(sex.体位, ''),
+      climaxes: Math.round(Math.max(0, numberValue(sex.本次高潮次数))),
+    },
+    people: [character('芽衣', '内心独白', MAY_BODY), character('克雷塔', '心声', CRETA_BODY)],
   };
 }
 
@@ -222,12 +290,43 @@ const RUNTIMES = [
   'https://cdn.jsdelivr.net/npm/pixi.js@7.4.2/dist/pixi.min.js',
   'https://cdn.jsdelivr.net/npm/pixi-live2d-display-lipsyncpatch@0.5.0-ls-8/dist/cubism4.min.js',
 ];
+// 十六个中文心情 -> 各模型实际拥有的日文表情名。一个模型里可能同时有「0びっくり」和
+// 「0びっくり半泣き」，所以先按完整名精确匹配，再退回子串匹配，避免「惊讶」选到半哭脸。
 const EXPRESSIONS = {
-  微笑: ['優しく微笑', '微笑'], 坏笑: ['ヤンデレ笑', 'ヤンデレニコリ'],
-  大笑: ['口開けて笑う'], 不悦: ['ムスッとする'], 生气: ['怒る'],
-  惊讶: ['びっくり'], 为难: ['困り笑い', '困る'], 害羞: ['ハニカミ'],
-  半哭: ['半泣き'], 流泪: ['涙を流す'],
+  微笑: ['優しく微笑む', '微笑む'],
+  坏笑: ['ヤンデレ笑い', 'ヤンデレニコリ', '穿いたままヤンデレ笑い', 'ヤンデレ笑'],
+  大笑: ['口開けて笑う'],
+  不悦: ['ムスッとする'],
+  生气: ['怒る'],
+  惊讶: ['びっくり'],
+  为难: ['困り笑い', '困る'],
+  害羞: ['圭一みたいなハニカミ', 'ハニカミ', '口開けて笑う'],
+  半哭: ['びっくり半泣き', '半泣き'],
+  流泪: ['涙を流す'],
+  兴奋: ['テヘペロ興奮', '軽いアヘ'],
+  轻阿黑: ['軽いアヘ'],
+  阿黑颜: ['嬉しそうなアヘ顔', 'ちんちんアヘ顔', 'アヘ顔', '軽いアヘ'],
+  失神: ['能面'],
+  被玩坏: ['歯を食いしばって気持ち良くなる', '泣いてるアヘ顔', 'ちんちんアヘ顔', '軽いアヘ'],
 };
+
+/** 模型里的表情名有的是「0微笑む」，有的带 .exp3.json 后缀，比对前统一剥掉。 */
+function stripExpressionName(name) {
+  return String(name ?? '').replace(/\.exp3\.json$/i, '').replace(/^\d+/, '');
+}
+
+function pickExpressionName(names, mood) {
+  const fragments = EXPRESSIONS[mood] ?? [];
+  for (const fragment of fragments) {
+    const exact = names.find(name => stripExpressionName(name) === fragment);
+    if (exact) return exact;
+  }
+  for (const fragment of fragments) {
+    const partial = names.find(name => String(name).includes(fragment));
+    if (partial) return partial;
+  }
+  return undefined;
+}
 
 function stageGeometry(width, height, modelWidth, modelHeight, index) {
   const cellWidth = width / 2;
@@ -304,7 +403,7 @@ function applyMood(model, mood) {
   // Reset old expressions as well as selecting the new one (including 平常).
   manager?.resetExpression?.();
   const names = (model.internalModel?.settings?.expressions ?? []).map(x => x.Name ?? x.name).filter(Boolean);
-  const expression = (EXPRESSIONS[mood] ?? []).map(fragment => names.find(name => name.includes(fragment))).find(Boolean);
+  const expression = pickExpressionName(names, mood);
   if (expression) Promise.resolve(model.expression(expression)).catch(() => {});
 }
 
@@ -356,8 +455,9 @@ function createLive2DStage(Vue) {
           const actor = props.actors[index];
           let model;
           try {
-            // Only the ordinary-outfit model allowlist is accepted, including on retries.
-            if (actor.model !== PLAIN_MODELS[actor.name]) throw new Error('Unknown model');
+            // 只接受该角色着装词表里的模型，重试时同样校验。
+            const allowed = OUTFIT_MODELS[actor.name];
+            if (!allowed || !Object.values(allowed).includes(actor.model)) throw new Error('Unknown model');
             model = await window.PIXI.live2d.Live2DModel.from(ASSET_BASE + actor.model,
               { autoHitTest: false, autoFocus: false, motionPreload: 'NONE' });
             if (disposed || revision !== current) { model.destroy(); return; }
@@ -489,19 +589,42 @@ function createStatusbarApp(Vue, useStore, Live2DStage) {
           ], { 'aria-label': '人物展示' }),
           el('section', 'voices', data.people.map((person, index) => el('article', `voice voice--${index}`, [
             el('div', 'voice__head', [el('h2', 'voice__name', person.name), label(index === 0 ? '内心独白' : '心声')]),
+            person.state ? el('p', 'voice__state', person.state) : null,
             el('p', 'voice__text', person.inner),
           ])), { 'aria-label': '人物心声' }),
           el('details', 'outfits', [
-            el('summary', 'outfits__summary', [el('span', '', '普通着装详情'), el('span', 'outfits__hint', '展开'),
+            el('summary', 'outfits__summary', [el('span', '', '着装详情'), el('span', 'outfits__hint', '展开'),
               el('span', 'outfits__chevron', '⌄', { 'aria-hidden': 'true' })]),
             el('div', 'outfits__content', [
-              el('p', 'outfits__note', '立绘采用普通着装展示，不改变剧情变量。'),
               el('div', 'outfits__grid', data.people.map(person => el('section', 'outfit', [
                 el('h3', 'outfit__name', person.name),
                 person.clothing.length ? el('dl', 'outfit__list', person.clothing.flatMap(item => [
                   el('dt', '', item.key), el('dd', '', item.value),
-                ])) : el('p', 'outfit__empty', '暂无普通着装记录。'),
+                ])) : el('p', 'outfit__empty', '暂无着装记录。'),
               ]))),
+            ]),
+          ]),
+          el('details', 'outfits outfits--body', [
+            el('summary', 'outfits__summary', [el('span', '', '身体状态'), el('span', 'outfits__hint', '展开'),
+              el('span', 'outfits__chevron', '⌄', { 'aria-hidden': 'true' })]),
+            el('div', 'outfits__content', [
+              el('div', 'outfits__grid', data.people.map(person => el('section', 'outfit', [
+                el('h3', 'outfit__name', person.name),
+                el('dl', 'outfit__list', person.body.flatMap(item => [
+                  el('dt', '', item.key), el('dd', '', item.value),
+                ])),
+              ]))),
+            ]),
+          ]),
+          el('details', 'outfits outfits--sex', [
+            el('summary', 'outfits__summary', [el('span', '', '性爱实时'), el('span', 'outfits__hint', '展开'),
+              el('span', 'outfits__chevron', '⌄', { 'aria-hidden': 'true' })]),
+            el('div', 'outfits__content', [
+              data.sex.active ? el('dl', 'outfit__list', [
+                el('dt', '', '对手'), el('dd', '', data.sex.partner || '—'),
+                el('dt', '', '体位'), el('dd', '', data.sex.position || '—'),
+                el('dt', '', '本次高潮次数'), el('dd', '', String(data.sex.climaxes)),
+              ]) : el('p', 'outfit__empty', '当前未进行。'),
             ]),
           ]),
           el('footer', 'wallet', [
