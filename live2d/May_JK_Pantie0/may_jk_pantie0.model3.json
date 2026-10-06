@@ -1,0 +1,119 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "May_JK_Pantie0.moc3",
+		"Textures": [
+			"May_JK_Pantie0.2048/texture_00.png"
+		],
+		"DisplayInfo": "May_JK_Pantie0.cdi3.json",
+		"Expressions": [
+			{
+				"Name": "0びっくり",
+				"File": "expressions/0びっくり.exp3.json"
+			},
+			{
+				"Name": "0びっくり困り",
+				"File": "expressions/0びっくり困り.exp3.json"
+			},
+			{
+				"Name": "0ハム太郎",
+				"File": "expressions/0ハム太郎.exp3.json"
+			},
+			{
+				"Name": "0ムスッとする",
+				"File": "expressions/0ムスッとする.exp3.json"
+			},
+			{
+				"Name": "0ヤンデレ困り",
+				"File": "expressions/0ヤンデレ困り.exp3.json"
+			},
+			{
+				"Name": "0ヤンデレ笑い",
+				"File": "expressions/0ヤンデレ笑い.exp3.json"
+			},
+			{
+				"Name": "0優しく微笑む",
+				"File": "expressions/0優しく微笑む.exp3.json"
+			},
+			{
+				"Name": "0半泣き",
+				"File": "expressions/0半泣き.exp3.json"
+			},
+			{
+				"Name": "0口開けて笑う",
+				"File": "expressions/0口開けて笑う.exp3.json"
+			},
+			{
+				"Name": "0困り笑い",
+				"File": "expressions/0困り笑い.exp3.json"
+			},
+			{
+				"Name": "0困る",
+				"File": "expressions/0困る.exp3.json"
+			},
+			{
+				"Name": "0嬉しそうなアヘ顔",
+				"File": "expressions/0嬉しそうなアヘ顔.exp3.json"
+			},
+			{
+				"Name": "0怒る",
+				"File": "expressions/0怒る.exp3.json"
+			},
+			{
+				"Name": "0歯を食いしばって気持ち良くなる",
+				"File": "expressions/0歯を食いしばって気持ち良くなる.exp3.json"
+			},
+			{
+				"Name": "0泣いてるアヘ顔",
+				"File": "expressions/0泣いてるアヘ顔.exp3.json"
+			},
+			{
+				"Name": "0涙を流す",
+				"File": "expressions/0涙を流す.exp3.json"
+			},
+			{
+				"Name": "0能面",
+				"File": "expressions/0能面.exp3.json"
+			},
+			{
+				"Name": "0軽いアヘ",
+				"File": "expressions/0軽いアヘ.exp3.json"
+			}
+		],
+		"Motions": {
+			"Idle": [
+				{
+					"File": "motions/■セクシー.motion3.json"
+				},
+				{
+					"File": "motions/■動きが少ない.motion3.json"
+				},
+				{
+					"File": "motions/■準備体操.motion3.json"
+				},
+				{
+					"File": "motions/■通常.motion3.json"
+				},
+				{
+					"File": "motions/■通常揺れない乳.motion3.json"
+				},
+				{
+					"File": "motions/■素っ裸の状態限定.motion3.json"
+				}
+			]
+		}
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": []
+		},
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": []
+		}
+	],
+	"HitAreas": []
+}

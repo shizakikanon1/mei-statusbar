@@ -1,0 +1,105 @@
+{
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "Creta_JK.moc3",
+		"Textures": [
+			"Creta_JK.2048/texture_00.png"
+		],
+		"DisplayInfo": "Creta_JK.cdi3.json",
+		"Expressions": [
+			{
+				"Name": "0びっくり",
+				"File": "expressions/0びっくり.exp3.json"
+			},
+			{
+				"Name": "0びっくり半泣き",
+				"File": "expressions/0びっくり半泣き.exp3.json"
+			},
+			{
+				"Name": "0アヘ顔",
+				"File": "expressions/0アヘ顔.exp3.json"
+			},
+			{
+				"Name": "0テヘペロ興奮",
+				"File": "expressions/0テヘペロ興奮.exp3.json"
+			},
+			{
+				"Name": "0ハム太郎",
+				"File": "expressions/0ハム太郎.exp3.json"
+			},
+			{
+				"Name": "0ムスッとする",
+				"File": "expressions/0ムスッとする.exp3.json"
+			},
+			{
+				"Name": "0ヤンデレニコリ",
+				"File": "expressions/0ヤンデレニコリ.exp3.json"
+			},
+			{
+				"Name": "0半泣き",
+				"File": "expressions/0半泣き.exp3.json"
+			},
+			{
+				"Name": "0口開けて笑う",
+				"File": "expressions/0口開けて笑う.exp3.json"
+			},
+			{
+				"Name": "0困る",
+				"File": "expressions/0困る.exp3.json"
+			},
+			{
+				"Name": "0圭一みたいなハニカミ",
+				"File": "expressions/0圭一みたいなハニカミ.exp3.json"
+			},
+			{
+				"Name": "0微笑む",
+				"File": "expressions/0微笑む.exp3.json"
+			},
+			{
+				"Name": "0怒る",
+				"File": "expressions/0怒る.exp3.json"
+			},
+			{
+				"Name": "0涙を流す",
+				"File": "expressions/0涙を流す.exp3.json"
+			},
+			{
+				"Name": "0能面",
+				"File": "expressions/0能面.exp3.json"
+			},
+			{
+				"Name": "0軽いアヘ",
+				"File": "expressions/0軽いアヘ.exp3.json"
+			}
+		],
+		"Motions": {
+			"Idle": [
+				{
+					"File": "motions/■カッコつける.motion3.json"
+				},
+				{
+					"File": "motions/■パンチラ少年.motion3.json"
+				},
+				{
+					"File": "motions/■女の子のポーズ.motion3.json"
+				},
+				{
+					"File": "motions/■能面.motion3.json"
+				}
+			]
+		}
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": []
+		},
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": []
+		}
+	],
+	"HitAreas": []
+}
