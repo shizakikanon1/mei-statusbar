@@ -1,0 +1,10 @@
+# Live2D 模型与贴图一律按二进制处理，禁止任何行尾转换
+*.moc3 binary
+*.png binary
+*.webp binary
+*.jpg binary
+*.exp3.json -text
+*.motion3.json -text
+*.model3.json -text
+*.cdi3.json -text
+*.html -text
