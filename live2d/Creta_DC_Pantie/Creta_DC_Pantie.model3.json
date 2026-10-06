@@ -1,11 +1,11 @@
 {
 	"Version": 3,
 	"FileReferences": {
-		"Moc": "Creta_Bikini.moc3",
+		"Moc": "Creta_DC_Pantie.moc3",
 		"Textures": [
-			"Creta_Bikini.2048/texture_00.png"
+			"Creta_DC_Pantie.2048/texture_00.png"
 		],
-		"DisplayInfo": "Creta_Bikini.cdi3.json",
+		"DisplayInfo": "Creta_DC_Pantie.cdi3.json",
 		"Expressions": [
 			{
 				"Name": "0びっくり",
@@ -91,18 +91,6 @@
 				},
 				{
 					"File": "motions/■ちんぽ能面.motion3.json"
-				},
-				{
-					"File": "motions/■カッコつける.motion3.json"
-				},
-				{
-					"File": "motions/■女の子のポーズ.motion3.json"
-				},
-				{
-					"File": "motions/■射精ショタ♂.motion3.json"
-				},
-				{
-					"File": "motions/■能面.motion3.json"
 				}
 			]
 		}
